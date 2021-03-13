@@ -12,11 +12,11 @@ uniform sampler2D colortex2;
 uniform sampler2D shadowtex0;
 uniform sampler2D shadowtex1;
 
-uniform sampler2D shadowcolor0;
-
 uniform sampler2D depthtex0;
 
 uniform sampler2D noisetex;
+
+uniform sampler2D shadowcolor0;
 
 uniform mat4 gbufferProjectionInverse;
 uniform mat4 gbufferModelViewInverse;
@@ -25,7 +25,7 @@ uniform mat4 shadowProjection;
 
 const float sunPathRotation = -40.0f;
 
-const float Ambient = 0.1f;
+const float Ambient = 0.01f;
 
 const int shadowMapResolution = 768;
 
