@@ -23,6 +23,12 @@ uniform mat4 gbufferModelViewInverse;
 uniform mat4 shadowModelView;
 uniform mat4 shadowProjection;
 
+/*
+const int colortex0Format = RGB16;
+const int colortex1Format = RGB16;
+const int colortex2Format = RGB16;
+*/
+
 const float sunPathRotation = -40.0f;
 
 const float Ambient = 0.01f;
@@ -108,13 +114,14 @@ void main() {
     float Depth = texture2D(depthtex0, TexCoords).r;
     if (Depth == 1.0f) {
         gl_FragData[0] = vec4(Albedo, 1.0f);
+        return;
     }
     vec2 Lightmap = texture2D(colortex2, TexCoords).rg;
     vec3 LightmapColor = GetLightmapColor(Lightmap);
     vec3 Normal = normalize(texture2D(colortex1, TexCoords).rgb * 2.0f - 1.0f);
     float NdotL = max(dot(Normal, normalize(sunPosition)), 0.0f);
     vec3 Diffuse = Albedo * (LightmapColor + NdotL + GetShadow(Depth) + Ambient);
-
+    
     /* DRAWBUFFERS:0 */
     gl_FragData[0] = vec4(Diffuse, 1.0f);
 
