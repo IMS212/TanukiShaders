@@ -104,7 +104,7 @@ vec3 TransparentShadow(in vec3 SampleCoords) {
     float ShadowVisibility0 = Visibility(shadowtex0, SampleCoords);
     float ShadowVisibility1 = Visibility(shadowtex1, SampleCoords);
     vec4 ShadowColor0 = texture2D(shadowcolor0, SampleCoords.xy);
-    vec3 TransmittedColor = ShadowColor0.rgb * (TransparentShadowHardness - ShadowColor0.a);
+    vec3 TransmittedColor = ShadowColor0.rgb * (TransparentShadowHardness - ShadowColor0.r);
     return mix(TransmittedColor * ShadowVisibility1, vec3(1.0f), ShadowVisibility0);
 }
 

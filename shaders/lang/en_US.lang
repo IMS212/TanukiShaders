@@ -1,0 +1,5 @@
+option.SHADOW_SAMPLES=Shadow Samples
+option.TransparentShadowHardness=Transparent Shadow Hardness
+option.shadowMapResolution=Shadow Map Resolution
+
+screen.Shadows=Shadow Options
