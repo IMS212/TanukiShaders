@@ -31,12 +31,12 @@ void main() {
     VWorldPos = VPos.xyz + CameraPosition;
     float WaveDisplacement = 0.0;
 
-	if(mc_Entity.x == Water) {
-		float FractY = fract(VWorldPos.y + 0.001);
-		float Waves = 0.05 * sin(3.14 * (frameTimeCounter * WaveSpeed + VWorldPos.x/5 + VWorldPos.z/6)) + 0.10 * sin(frameTimeCounter * WaveSpeed + VWorldPos.x/2.5 + VWorldPos.z/10);
-		WaveDisplacement = clamp(Waves, -FractY, 1.0-FractY);
-		VPos.y += WaveDisplacement * WaveAmount;
-	}
+    if(mc_Entity.x == Water) {
+        float FractY = fract(VWorldPos.y + 0.001);
+        float Waves = 0.05 * sin(3.14 * (frameTimeCounter * WaveSpeed + VWorldPos.x/5 + VWorldPos.z/6)) + 0.10 * sin(frameTimeCounter * WaveSpeed + VWorldPos.x/2.5 + VWorldPos.z/10);
+        WaveDisplacement = clamp(Waves, -FractY, 1.0-FractY);
+        VPos.y += WaveDisplacement * WaveAmount;
+    }
 
     if (mc_Entity.x == Lava) {
         float FractY = fract(VWorldPos.y + 0.001);
