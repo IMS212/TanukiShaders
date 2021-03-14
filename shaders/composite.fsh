@@ -1,22 +1,27 @@
 #version 120
 #include "distort.glsl"
 
+#define shadowMapResolution 4096 //[1024 2048 3092 4096 5120 6144 7168 8192 9216 10240]
+#define TransparentShadowHardness 2 // [0.5 1 2 3 4 5]
+
 varying vec2 TexCoords;
 
-uniform vec3 sunPosition;
+uniform vec3 shadowLightPosition;
 
 uniform sampler2D colortex0;
 uniform sampler2D colortex1;
 uniform sampler2D colortex2;
 
+uniform sampler2D depthtex0;
+
 uniform sampler2D shadowtex0;
 uniform sampler2D shadowtex1;
-
-uniform sampler2D depthtex0;
 
 uniform sampler2D noisetex;
 
 uniform sampler2D shadowcolor0;
+
+uniform int worldTime;
 
 uniform mat4 gbufferProjectionInverse;
 uniform mat4 gbufferModelViewInverse;
@@ -29,13 +34,11 @@ const int colortex1Format = RGB16;
 const int colortex2Format = RGB16;
 */
 
-const float sunPathRotation = -40.0f;
+const float sunPathRotation = 30.0f;
 
-const float Ambient = 0.01f;
+const float Ambient = 0.001f;
 
-const int shadowMapResolution = 768;
-
-const int noiseTextureResolution = 128;
+const int noiseTextureResolution = 64;
 
 float AdjustLightmapTorch(in float torch) {
     const float K = 2.0f;
@@ -50,15 +53,43 @@ float AdjustLightmapSky(in float sky) {
 
 vec2 AdjustLightmap(in vec2 Lightmap) {
     vec2 NewLightMap;
-    NewLightMap.x = AdjustLightmapTorch(NewLightMap.x);
+    NewLightMap.x = AdjustLightmapTorch(Lightmap.x);
     NewLightMap.y = AdjustLightmapSky(Lightmap.y);
     return NewLightMap;
 }
 
 vec3 GetLightmapColor(in vec2 Lightmap) {
     Lightmap = AdjustLightmap(Lightmap);
-    const vec3 TorchColor = vec3(1.0f, 0.25f, 0.08f);
-    const vec3 SkyColor = vec3(0.05f, 0.15f, 0.3f);
+    //const vec3 TorchColor = vec3(1.0f, 0.25f, 0.08f);
+    const vec3 TorchColor = vec3(2.0f, 1.25f, 1.08f);
+    vec3 SkyColor = vec3(0.05f, 0.15f, 0.3f);
+    if (worldTime > 13200) {
+        SkyColor = vec3(0.2, 0.325, 0.7);
+    }
+    if (worldTime > 13250) {
+        SkyColor = vec3(0.1, 0.225, 0.6);
+    }
+    if (worldTime > 13300) {
+        SkyColor = vec3(0.075, 0.2, 0.5);
+    }
+    if (worldTime > 13350) {
+        SkyColor = vec3(0.075, 0.1975, 0.4);
+    }
+    if (worldTime > 13400 && worldTime < 23800) {
+        SkyColor = vec3(0.0625, 0.1875, 0.375);
+    }
+    if (worldTime > 23850) {
+        SkyColor = vec3(0.075, 0.1975, 0.4);
+    }
+    if (worldTime > 0 && worldTime < 51) {
+        SkyColor = vec3(0.075, 0.2, 0.5);
+    }
+    if (worldTime > 50 && worldTime < 101) {
+        SkyColor = vec3(0.1, 0.225, 0.6);
+    }
+    if (worldTime > 100 && worldTime < 151) {
+        SkyColor = vec3(0.2, 0.325, 0.7);
+    }
     vec3 TorchLighting = Lightmap.x * TorchColor;
     vec3 SkyLighting = Lightmap.y * SkyColor;
     vec3 LightmapLighting = TorchLighting + SkyLighting;
@@ -73,11 +104,11 @@ vec3 TransparentShadow(in vec3 SampleCoords) {
     float ShadowVisibility0 = Visibility(shadowtex0, SampleCoords);
     float ShadowVisibility1 = Visibility(shadowtex1, SampleCoords);
     vec4 ShadowColor0 = texture2D(shadowcolor0, SampleCoords.xy);
-    vec3 TransmittedColor = ShadowColor0.rgb * (1.0f - ShadowColor0.a);
+    vec3 TransmittedColor = ShadowColor0.rgb * (TransparentShadowHardness - ShadowColor0.a);
     return mix(TransmittedColor * ShadowVisibility1, vec3(1.0f), ShadowVisibility0);
 }
 
-#define SHADOW_SAMPLES 2
+#define SHADOW_SAMPLES 2 //[0.5 1 1.5 2 2.5 3 3.5 4 4.5 5 5.5 6 6.5 7 7.5 8]
 const int ShadowSamplesPerSize = 2 * SHADOW_SAMPLES + 1;
 const int TotalSamples = ShadowSamplesPerSize * ShadowSamplesPerSize;
 
@@ -119,9 +150,15 @@ void main() {
     vec2 Lightmap = texture2D(colortex2, TexCoords).rg;
     vec3 LightmapColor = GetLightmapColor(Lightmap);
     vec3 Normal = normalize(texture2D(colortex1, TexCoords).rgb * 2.0f - 1.0f);
-    float NdotL = max(dot(Normal, normalize(sunPosition)), 0.0f);
+    float NdotL = max(dot(Normal, normalize(shadowLightPosition)), 0.0f);
     vec3 Diffuse = Albedo * (LightmapColor + NdotL + GetShadow(Depth) + Ambient);
-    
+
+    if (worldTime > 13200 && worldTime < 23500) {
+        Normal = normalize(texture2D(colortex1, vec2(0.0,1.0)).rgb * 2.0f - 1.0f);
+        NdotL = 0.15f;
+        Diffuse = Albedo * (LightmapColor + NdotL * GetShadow(Depth) + Ambient);
+    }
+
     /* DRAWBUFFERS:0 */
     gl_FragData[0] = vec4(Diffuse, 1.0f);
 
