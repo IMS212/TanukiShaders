@@ -1,7 +1,8 @@
 #version 120
 #include "distort.glsl"
 
-#define shadowMapResolution 4096 //[1024 2048 3092 4096 5120 6144 7168 8192 9216 10240]
+#define ShadowMapResolution 4096 //[1024 2048 3092 4096 5120 6144 7168 8192 9216 10240]
+#define ShadowSamples 2 //[0.5 1 1.5 2 2.5 3 3.5 4 4.5 5 5.5 6 6.5 7 7.5 8]
 #define TransparentShadowHardness 2 // [0.5 1 2 3 4 5]
 
 varying vec2 TexCoords;
@@ -108,8 +109,8 @@ vec3 TransparentShadow(in vec3 SampleCoords) {
     return mix(TransmittedColor * ShadowVisibility1, vec3(1.0f), ShadowVisibility0);
 }
 
-#define SHADOW_SAMPLES 2 //[0.5 1 1.5 2 2.5 3 3.5 4 4.5 5 5.5 6 6.5 7 7.5 8]
-const int ShadowSamplesPerSize = 2 * SHADOW_SAMPLES + 1;
+
+const int ShadowSamplesPerSize = 2 * ShadowSamples + 1;
 const int TotalSamples = ShadowSamplesPerSize * ShadowSamplesPerSize;
 
 vec3 GetShadow(float depth) {
@@ -128,9 +129,9 @@ vec3 GetShadow(float depth) {
     float RandomAngle = texture2D(noisetex, TexCoords * 20.0f).r * 100.0f;
     float cosTheta = cos(RandomAngle);
     float sinTheta = sin(RandomAngle);
-    mat2 Rotation = mat2(cosTheta, -sinTheta, sinTheta, cosTheta) / shadowMapResolution;
-    for(int x = -SHADOW_SAMPLES; x <= SHADOW_SAMPLES; x++) {
-        for (int y = -SHADOW_SAMPLES; y <= SHADOW_SAMPLES; y++) {
+    mat2 Rotation = mat2(cosTheta, -sinTheta, sinTheta, cosTheta) / ShadowMapResolution;
+    for(int x = -ShadowSamples; x <= ShadowSamples; x++) {
+        for (int y = -ShadowSamples; y <= ShadowSamples; y++) {
             vec2 Offset = Rotation * vec2(x, y);
             vec3 CurrentSampleCoordinate = vec3(SampleCoords.xy + Offset, SampleCoords.z);
             ShadowAccum += TransparentShadow(CurrentSampleCoordinate);
