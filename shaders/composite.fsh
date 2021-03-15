@@ -4,6 +4,7 @@
 #define ShadowMapResolution 4096 //[1024 2048 3092 4096 5120 6144 7168 8192 9216 10240]
 #define ShadowSamples 2 //[0.5 1 1.5 2 2.5 3 3.5 4 4.5 5 5.5 6 6.5 7 7.5 8]
 #define TransparentShadowHardness 2 // [0.5 1 2 3 4 5]
+#define noiseTextureResolution = 64; // [16 32 64 128 256]
 
 varying vec2 TexCoords;
 
@@ -37,9 +38,7 @@ const int colortex2Format = RGB16;
 
 const float sunPathRotation = 30.0f;
 
-const float Ambient = 0.001f;
-
-const int noiseTextureResolution = 64;
+const float Ambient = 0.025f;
 
 float AdjustLightmapTorch(in float torch) {
     const float K = 2.0f;
@@ -108,7 +107,6 @@ vec3 TransparentShadow(in vec3 SampleCoords) {
     vec3 TransmittedColor = ShadowColor0.rgb * (TransparentShadowHardness - ShadowColor0.r);
     return mix(TransmittedColor * ShadowVisibility1, vec3(1.0f), ShadowVisibility0);
 }
-
 
 const int ShadowSamplesPerSize = 2 * ShadowSamples + 1;
 const int TotalSamples = ShadowSamplesPerSize * ShadowSamplesPerSize;
