@@ -2,7 +2,7 @@
 #include "distort.glsl"
 
 #define ShadowMapResolution 4096 //[1024 2048 3092 4096 5120 6144 7168 8192 9216 10240]
-#define ShadowSamples 2 //[0.5 1 1.5 2 2.5 3 3.5 4 4.5 5 5.5 6 6.5 7 7.5 8]
+#define ShadowSamples 2 //[1 2 3 4 5 6 7 8]
 #define TransparentShadowHardness 2 // [0.5 1 2 3 4 5]
 #define noiseTextureResolution = 64; // [16 32 64 128 256]
 
